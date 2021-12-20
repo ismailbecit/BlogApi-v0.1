@@ -23,9 +23,13 @@ func Router() {
 	user.GET("/info", controller.UserInfo)
 	post := e.Group("/post")
 	post.GET("/list", controller.PostList)
-
+	post.Use(middleware.JWTWithConfig(config.JwtConfig))
+	post.POST("/insert", controller.PostInsert)
+	post.POST("/del", controller.PostDel)
 	category := e.Group("/category")
+	category.GET("/list", controller.CategoryList)
 	category.POST("/insert", controller.CategoryInsert)
+	category.POST("/del", controller.CategoryDel)
 
 	e.Start(":8080")
 

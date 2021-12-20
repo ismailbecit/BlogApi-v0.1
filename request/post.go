@@ -6,3 +6,6 @@ type PostInsert struct {
 	Userfk     uint   `json:"userfk"`
 	Categoryfk uint   `json:"categoryfk"`
 }
+type PostDel struct {
+	ID int `json:"id"`
+}

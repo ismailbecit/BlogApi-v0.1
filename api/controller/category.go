@@ -21,3 +21,31 @@ func CategoryInsert(c echo.Context) error {
 	return c.JSON(http.StatusOK, "Kategori Başarıyla Oluşturuldu")
 
 }
+func CategoryList(c echo.Context) error {
+	var category []modal.Category
+	db := config.Conn()
+	result := db.Find(&category)
+	if result.RowsAffected == 0 {
+		return c.JSON(http.StatusOK, "Kategori Bulunamadı")
+	}
+	return c.JSON(http.StatusOK, category)
+}
+func CategoryDel(c echo.Context) error {
+	var category modal.Category
+	var rq request.CategoryDel
+	// var post modal.Post
+	if err := c.Bind(&rq); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+	db := config.Conn()
+	//  id e ait kategorileri sorgulaama
+	result := db.Find(&category, rq.ID)
+	if result.RowsAffected == 0 {
+		return c.JSON(http.StatusBadRequest, "Kayıtlı İd Bulunamadı")
+	}
+	db.Where("id = ? ", rq.ID).Find(&category)
+
+	db.Unscoped().Delete(&category)
+
+	return c.JSON(http.StatusOK, "Silme İşlemi Başarılı!")
+}
