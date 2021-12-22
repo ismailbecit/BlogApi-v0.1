@@ -27,8 +27,8 @@ func PostList(c echo.Context) error {
 func PostInsert(c echo.Context) error {
 	var rq request.PostInsert
 
-	if err := c.Bind(&rq); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+	if helper.Validator(&c, &rq) != nil {
+		return nil
 	}
 	authinfo := helper.AuthInfo(c)
 	db := config.Conn()
@@ -44,15 +44,14 @@ func PostInsert(c echo.Context) error {
 func PostDel(c echo.Context) error {
 	var post modal.Post
 	var rq request.PostDel
-	if err := c.Bind(&rq); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+	if helper.Validator(&c, &rq) != nil {
+		return nil
 	}
 	db := config.Conn()
 	result := db.Find(&post, rq.ID)
 	if result.RowsAffected == 0 {
 		return c.JSON(http.StatusOK, "Kayıtlı id bulunamadı")
 	}
-	db.Where("id = ? ", rq.ID).Find(&post)
-
+	db.Delete(&post, rq.ID)
 	return c.JSON(http.StatusOK, "Post Silindi")
 }

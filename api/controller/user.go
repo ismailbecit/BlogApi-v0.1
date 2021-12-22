@@ -15,8 +15,8 @@ func UserInsert(c echo.Context) error {
 	var user modal.User
 	var rq request.UserInsert
 
-	if err := c.Bind(&rq); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+	if helper.Validator(&c, &rq) != nil {
+		return nil
 	}
 	db := config.Conn()
 	result := db.Where("email = ? ", rq.Email).Find(&user)
@@ -41,9 +41,8 @@ func UserInsert(c echo.Context) error {
 func UserLogin(c echo.Context) error {
 	var user modal.User
 	var rq request.UserLogin
-
-	if err := c.Bind(&rq); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+	if helper.Validator(&c, &rq) != nil {
+		return nil
 	}
 	db := config.Conn()
 	db.Where("email = ?", rq.Email).Find(&user)

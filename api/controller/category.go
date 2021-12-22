@@ -2,6 +2,7 @@ package controller
 
 import (
 	"blogapi/api/config"
+	"blogapi/api/helper"
 	"blogapi/api/modal"
 	"blogapi/request"
 	"net/http"
@@ -11,9 +12,10 @@ import (
 
 func CategoryInsert(c echo.Context) error {
 	var rq request.CategoryInsert
-	if err := c.Bind(&rq); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+	if helper.Validator(&c, &rq) != nil {
+		return nil
 	}
+
 	db := config.Conn()
 	db.Create(&modal.Category{
 		Name: rq.Name,
@@ -33,9 +35,8 @@ func CategoryList(c echo.Context) error {
 func CategoryDel(c echo.Context) error {
 	var category modal.Category
 	var rq request.CategoryDel
-	// var post modal.Post
-	if err := c.Bind(&rq); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+	if helper.Validator(&c, &rq) != nil {
+		return nil
 	}
 	db := config.Conn()
 	//  id e ait kategorileri sorgulaama

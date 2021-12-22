@@ -1,14 +1,14 @@
 package request
 
 type UserInsert struct {
-	Name     string `json:"name"`
-	Surname  string `json:"surname"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Age      int    `json:"age"`
+	Name     string `validate:"required" json:"name"`
+	Surname  string `validate:"required" json:"surname"`
+	Email    string `validate:"required" json:"email"`
+	Password string `validate:"required" json:"password"`
+	Age      int    `validate:"required" json:"age"`
 }
 
 type UserLogin struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `validate:"required" json:"email"`
+	Password string `validate:"required" json:"password"`
 }

@@ -1,11 +1,10 @@
 package request
 
 type PostInsert struct {
-	Title      string `json:"title"`
-	Content    string `json:"content"`
-	Userfk     uint   `json:"userfk"`
-	Categoryfk uint   `json:"categoryfk"`
+	Title      string `validate:"required" json:"title"`
+	Content    string `validate:"required" json:"content"`
+	Categoryfk uint   `validate:"required" json:"categoryfk"`
 }
 type PostDel struct {
-	ID int `json:"id"`
+	ID int `validate:"required" json:"id"`
 }

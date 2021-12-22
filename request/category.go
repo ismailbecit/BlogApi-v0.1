@@ -1,9 +1,9 @@
 package request
 
 type CategoryInsert struct {
-	Name string `json:"name"`
+	Name string `validate:"required" json:"name"`
 }
 
 type CategoryDel struct {
-	ID int `json:"id"`
+	ID int `validate:"required" json:"id"`
 }
