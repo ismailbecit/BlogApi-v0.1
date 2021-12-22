@@ -1,14 +1,12 @@
 package config
 
 import (
-	"blogapi/api/modal"
-
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 type UserJwtCustom struct {
-	User modal.User `json:"user"`
+	ID uint `json:"id"`
 	jwt.StandardClaims
 }
 

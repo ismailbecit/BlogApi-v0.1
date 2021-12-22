@@ -36,13 +36,13 @@ func PostInsert(c echo.Context) error {
 	if result.RowsAffected == 0 {
 		return c.JSON(http.StatusBadRequest, helper.Response(nil, "Kategori İd Bulunamadı"))
 	}
-	authinfo := helper.AuthInfo(c)
+	authinfo := helper.AuthID(c)
 
 	db.Create(&modal.Post{
 		Title:      rq.Title,
 		Content:    rq.Content,
 		Categoryfk: rq.Categoryfk,
-		Userfk:     authinfo.ID,
+		Userfk:     authinfo,
 	})
 
 	return c.JSON(http.StatusOK, helper.Response(nil, "Post Kaydedildi"))

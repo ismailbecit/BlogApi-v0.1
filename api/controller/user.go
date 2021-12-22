@@ -6,6 +6,7 @@ import (
 	"blogapi/api/modal"
 	"blogapi/request"
 	"net/http"
+	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -50,18 +51,25 @@ func UserLogin(c echo.Context) error {
 	if !checkpass {
 		return c.JSON(http.StatusBadRequest, "Kullanıcı Adı Veya Şifre Hatalı")
 	}
-	claims := helper.Claims(user)
+	claims := &config.UserJwtCustom{
+		ID: user.Model.ID,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
+		},
+	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	t, _ := token.SignedString([]byte("mykey"))
 
-	return c.JSON(http.StatusOK, echo.Map{
+	return c.JSON(http.StatusOK, helper.Response(map[string]interface{}{
 		"token": t,
-		"info":  user,
-	})
+		"Email": user}, "Giriş Başarılı Bir Şekilde Tamamlandı"))
 
 }
 
 func UserInfo(c echo.Context) error {
-	user := helper.AuthInfo(c)
-	return c.JSON(http.StatusOK, user.ID)
+	var user modal.User
+	userid := helper.AuthID(c)
+	db := config.Conn()
+	db.First(&user, userid)
+	return c.JSON(http.StatusOK, helper.Response(user, "Kullanıcı Bilgileri"))
 }
