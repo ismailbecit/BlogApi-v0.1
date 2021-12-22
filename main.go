@@ -8,5 +8,4 @@ func main() {
 
 	router.Router()
 
-	//debene
 }

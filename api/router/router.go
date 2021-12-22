@@ -11,6 +11,7 @@ import (
 func init() {
 	// veri tabanı bağlantısı
 	config.Conn()
+
 }
 
 func Router() {

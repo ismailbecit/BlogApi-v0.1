@@ -4,6 +4,7 @@ import (
 	"blogapi/api/config"
 	"blogapi/api/helper"
 	"blogapi/api/modal"
+	"blogapi/repository"
 	"blogapi/request"
 	"net/http"
 
@@ -15,12 +16,8 @@ func CategoryInsert(c echo.Context) error {
 	if helper.Validator(&c, &rq) != nil {
 		return nil
 	}
-
-	db := config.Conn()
-	db.Create(&modal.Category{
-		Name: rq.Name,
-	})
-	return c.JSON(http.StatusOK, "Kategori Başarıyla Oluşturuldu")
+	err := repository.Get().Category().New(&rq)
+	return c.JSON(http.StatusOK, helper.Response(err, "Kayıt Başarılı"))
 
 }
 func CategoryList(c echo.Context) error {
@@ -28,7 +25,7 @@ func CategoryList(c echo.Context) error {
 	db := config.Conn()
 	result := db.Find(&category)
 	if result.RowsAffected == 0 {
-		return c.JSON(http.StatusOK, "Kategori Bulunamadı")
+		return c.JSON(http.StatusBadRequest, helper.Response(nil, "Kategori Bulunamadı"))
 	}
 	return c.JSON(http.StatusOK, category)
 }
@@ -42,11 +39,11 @@ func CategoryDel(c echo.Context) error {
 	//  id e ait kategorileri sorgulaama
 	result := db.Find(&category, rq.ID)
 	if result.RowsAffected == 0 {
-		return c.JSON(http.StatusBadRequest, "Kayıtlı İd Bulunamadı")
+		return c.JSON(http.StatusBadRequest, helper.Response(nil, "Kayıtlı İd Bulunamadı"))
 	}
 	db.Where("id = ? ", rq.ID).Find(&category)
 
 	db.Unscoped().Delete(&category)
 
-	return c.JSON(http.StatusOK, "Silme İşlemi Başarılı!")
+	return c.JSON(http.StatusOK, helper.Response(nil, "Silme İşlemi Başarılı!"))
 }
