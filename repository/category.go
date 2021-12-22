@@ -2,7 +2,6 @@ package repository
 
 import (
 	"blogapi/api/modal"
-	"blogapi/request"
 
 	"gorm.io/gorm"
 )
@@ -15,7 +14,8 @@ type CategoryRepo struct {
 	db *gorm.DB
 }
 
-func (ct CategoryRepo) New(rq *request.CategoryInsert) error {
-	err := ct.db.Create(modal.Category{Name: rq.Name})
+// veri tabanı katmanında sadice vt işlemleri yap controller içinde buraya vt nesnesi gönder başka bir işlem yaptırma !!!
+func (ct CategoryRepo) New(category modal.Category) error {
+	err := ct.db.Create(&category)
 	return err.Error
 }

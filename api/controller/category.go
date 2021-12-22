@@ -16,7 +16,10 @@ func CategoryInsert(c echo.Context) error {
 	if helper.Validator(&c, &rq) != nil {
 		return nil
 	}
-	err := repository.Get().Category().New(&rq)
+	category := modal.Category{
+		Name: rq.Name,
+	}
+	err := repository.Get().Category().New(category)
 	return c.JSON(http.StatusOK, helper.Response(err, "Kayıt Başarılı"))
 
 }

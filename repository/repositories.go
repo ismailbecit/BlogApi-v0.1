@@ -22,7 +22,5 @@ func Set() {
 }
 
 func Get() *Repositories {
-
 	return Repo
-
 }
