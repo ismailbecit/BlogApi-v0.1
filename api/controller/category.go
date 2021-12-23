@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"blogapi/api/config"
 	"blogapi/api/helper"
 	"blogapi/api/modal"
 	"blogapi/repository"
@@ -10,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
 func CategoryInsert(c echo.Context) error {
@@ -26,28 +24,21 @@ func CategoryInsert(c echo.Context) error {
 
 }
 func CategoryList(c echo.Context) error {
-	var category []modal.Category
-	db := config.Conn()
-	result := db.Find(&category)
-	if result.RowsAffected == 0 {
-		return c.JSON(http.StatusBadRequest, helper.Response(nil, "Kategori Bulunamadı"))
-	}
-	return c.JSON(http.StatusOK, category)
+	categories := repository.Get().Category().List()
+	return c.JSON(http.StatusOK, helper.Response(categories, "Kategori Listesi"))
 }
 func CategoryDel(c echo.Context) error {
 	var rq request.CategoryDel
-
 	if helper.Validator(&c, &rq) != nil {
 		return nil
 	}
-	category := modal.Category{
-		Model: gorm.Model{
-			ID: rq.ID,
-		},
+
+	result := repository.Get().Category().Query(rq.ID)
+	fmt.Println(result)
+	if result == 0 {
+		return c.JSON(http.StatusBadRequest, helper.Response(nil, "Böyle Bir Id Bulunamadı"))
 	}
-	fmt.Println(category.ID)
 
-	repository.Get().Category().Del(category)
-
+	repository.Get().Category().Del(rq.ID)
 	return c.JSON(http.StatusOK, helper.Response(nil, "Silme İşlemi Başarılı!"))
 }

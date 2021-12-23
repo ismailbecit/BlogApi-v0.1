@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"blogapi/api/config"
 	"blogapi/api/helper"
 	"blogapi/api/modal"
+	"blogapi/repository"
 	"blogapi/request"
 	"net/http"
 
@@ -11,39 +11,27 @@ import (
 )
 
 func PostList(c echo.Context) error {
-	var post []modal.Post
-	db := config.Conn()
-
-	result := db.Find(&post)
-
-	db.Preload("Category").Preload("User").Find(&post)
-
-	if result.RowsAffected == 0 {
-		return c.JSON(http.StatusBadRequest, "Kayıtlı Post Bulunamadı")
-	}
-	return c.JSON(http.StatusOK, post)
-
+	postlist := repository.Get().Post().List()
+	return c.JSON(http.StatusOK, postlist)
 }
 func PostInsert(c echo.Context) error {
 	var rq request.PostInsert
-	var category modal.Category
 	if helper.Validator(&c, &rq) != nil {
 		return nil
 	}
-	db := config.Conn()
-
-	result := db.Where("id = ? ", rq.Categoryfk).Find(&category)
-	if result.RowsAffected == 0 {
+	result := repository.Get().Post().CategoryFK(rq.Categoryfk)
+	if result == 0 {
 		return c.JSON(http.StatusBadRequest, helper.Response(nil, "Kategori İd Bulunamadı"))
 	}
 	authinfo := helper.AuthID(c)
 
-	db.Create(&modal.Post{
+	post := modal.Post{
 		Title:      rq.Title,
 		Content:    rq.Content,
 		Categoryfk: rq.Categoryfk,
 		Userfk:     authinfo,
-	})
+	}
+	repository.Get().Post().New(post)
 
 	return c.JSON(http.StatusOK, helper.Response(nil, "Post Kaydedildi"))
 }
@@ -54,11 +42,10 @@ func PostDel(c echo.Context) error {
 	if helper.Validator(&c, &rq) != nil {
 		return nil
 	}
-	db := config.Conn()
-	result := db.Find(&post, rq.ID)
-	if result.RowsAffected == 0 {
+	result := repository.Get().Post().Query(post, uint(rq.ID))
+	if result == 0 {
 		return c.JSON(http.StatusBadRequest, helper.Response(nil, "Kayıtlı id bulunamadı"))
 	}
-	db.Delete(&post, rq.ID)
+	repository.Get().Post().Del(uint(rq.ID))
 	return c.JSON(http.StatusOK, helper.Response(nil, "Post Silindi"))
 }

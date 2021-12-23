@@ -2,7 +2,6 @@ package repository
 
 import (
 	"blogapi/api/modal"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -17,13 +16,26 @@ type CategoryRepo struct {
 
 // veri tabanı katmanında sadice vt işlemleri yap controller içinde buraya vt nesnesi gönder başka bir işlem yaptırma !!!
 func (ct CategoryRepo) New(category modal.Category) error {
-	err := ct.db.Create(&category)
+	err := ct.db.Debug().Create(&category)
 	return err.Error
 }
 
-func (ct CategoryRepo) Del(category modal.Category) error {
+func (ct CategoryRepo) List() []modal.Category {
+	var category []modal.Category
+	ct.db.Debug().Find(&category)
+	return category
+}
 
-	err := ct.db.Delete(&category, category.ID)
-	fmt.Println(category.ID)
+func (ct CategoryRepo) Del(id uint) error {
+	u := modal.Category{}
+	err := ct.db.Debug().Where("id = ?", id).Delete(&u)
 	return err.Error
+}
+
+func (ct CategoryRepo) Query(id uint) int64 {
+	var count int64
+	u := modal.Category{}
+	ct.db.Debug().Where("id = ?", id).Find(&u).Count(&count)
+	return count
+
 }

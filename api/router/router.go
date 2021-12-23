@@ -22,6 +22,7 @@ func Router() {
 	user.POST("/login", controller.UserLogin)
 	user.GET("/list", controller.UserList)
 	user.Use(middleware.JWTWithConfig(config.JwtConfig))
+	user.POST("/del", controller.UserDel)
 	user.GET("/info", controller.UserInfo)
 	post := e.Group("/post")
 	post.GET("/list", controller.PostList)

@@ -4,6 +4,7 @@ import (
 	"blogapi/api/config"
 	"blogapi/api/helper"
 	"blogapi/api/modal"
+	"blogapi/repository"
 	"blogapi/request"
 	"net/http"
 	"time"
@@ -13,29 +14,41 @@ import (
 )
 
 func UserInsert(c echo.Context) error {
-	var user modal.User
 	var rq request.UserInsert
 
 	if helper.Validator(&c, &rq) != nil {
 		return nil
 	}
-	db := config.Conn()
-	result := db.Where("email = ? ", rq.Email).Find(&user)
-	if result.RowsAffected != 0 {
-		return c.JSON(http.StatusBadRequest, "Kullanıcı Zaten Kayıtlı")
-	}
-
 	hashpass, _ := helper.HashPassword(rq.Password)
 
 	// kayıt işlemi
-	db.Create(&modal.User{
+	user := modal.User{
 		Name:     rq.Name,
 		Surname:  rq.Surname,
 		Email:    rq.Email,
 		Password: hashpass,
 		Age:      rq.Age,
-	})
-	return c.JSON(http.StatusOK, "Tebrikler Başarıyla Kayıt Oldunuz")
+	}
+
+	result := repository.Get().User().EmailQuery(rq.Email)
+	if result != 0 {
+		return c.JSON(http.StatusBadRequest, "Kullanıcı Zaten Kayıtlı")
+	}
+
+	claims := &config.UserJwtCustom{
+		ID: user.Model.ID,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	t, _ := token.SignedString([]byte("mykey"))
+
+	newuser := repository.Get().User().New(user)
+
+	return c.JSON(http.StatusOK, helper.Response(map[string]interface{}{
+		"userinfo": newuser, "token": t},
+		"Tebrikler Başarıyla Kayıt Oldunuz"))
 
 }
 
@@ -45,12 +58,14 @@ func UserLogin(c echo.Context) error {
 	if helper.Validator(&c, &rq) != nil {
 		return nil
 	}
-	db := config.Conn()
-	db.Where("email = ?", rq.Email).Find(&user)
-	checkpass := helper.CheckPasswordHash(rq.Password, user.Password)
-	if !checkpass {
-		return c.JSON(http.StatusBadRequest, "Kullanıcı Adı Veya Şifre Hatalı")
+	result := repository.Get().User().EmailQuery(rq.Email)
+	if result == 1 {
+		checkpass := helper.CheckPasswordHash(rq.Password, user.Password)
+		if !checkpass {
+			return c.JSON(http.StatusBadRequest, "Kullanıcı Adı Veya Şifre Hatalı")
+		}
 	}
+
 	claims := &config.UserJwtCustom{
 		ID: user.Model.ID,
 		StandardClaims: jwt.StandardClaims{
@@ -67,16 +82,22 @@ func UserLogin(c echo.Context) error {
 }
 
 func UserInfo(c echo.Context) error {
-	var user modal.User
 	userid := helper.AuthID(c)
-	db := config.Conn()
-	db.First(&user, userid)
-	return c.JSON(http.StatusOK, userid)
+	user := repository.Get().User().UserInfo(userid)
+	return c.JSON(http.StatusOK, helper.Response(user, "Kullanıcı Bilgisi"))
 }
 
 func UserList(c echo.Context) error {
 	var user []modal.User
-	db := config.Conn()
-	db.Find(&user)
-	return c.JSON(http.StatusOK, helper.Response(user, "Kayıtlı Kullanıcılar"))
+	users := repository.Get().User().UserList(user)
+	return c.JSON(http.StatusOK, helper.Response(users, "Kayıtlı Kullanıcılar"))
+}
+
+func UserDel(c echo.Context) error {
+	var rq request.UserDel
+	if helper.Validator(&c, &rq) != nil {
+		return nil
+	}
+	repository.Get().User().UserDel(rq.Id)
+	return c.JSON(http.StatusOK, helper.Response(nil, "Kullanıcı Silindi"))
 }

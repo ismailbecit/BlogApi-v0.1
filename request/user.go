@@ -12,3 +12,7 @@ type UserLogin struct {
 	Email    string `validate:"required" json:"email"`
 	Password string `validate:"required" json:"password"`
 }
+
+type UserDel struct {
+	Id uint `validate:"required" json:"id"`
+}
