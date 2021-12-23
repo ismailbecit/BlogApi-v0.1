@@ -71,5 +71,12 @@ func UserInfo(c echo.Context) error {
 	userid := helper.AuthID(c)
 	db := config.Conn()
 	db.First(&user, userid)
-	return c.JSON(http.StatusOK, helper.Response(user, "Kullanıcı Bilgileri"))
+	return c.JSON(http.StatusOK, userid)
+}
+
+func UserList(c echo.Context) error {
+	var user []modal.User
+	db := config.Conn()
+	db.Find(&user)
+	return c.JSON(http.StatusOK, helper.Response(user, "Kayıtlı Kullanıcılar"))
 }

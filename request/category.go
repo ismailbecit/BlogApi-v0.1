@@ -5,5 +5,5 @@ type CategoryInsert struct {
 }
 
 type CategoryDel struct {
-	ID int `validate:"required" json:"id"`
+	ID uint `validate:"required" json:"id"`
 }

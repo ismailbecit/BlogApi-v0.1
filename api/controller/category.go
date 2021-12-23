@@ -6,6 +6,7 @@ import (
 	"blogapi/api/modal"
 	"blogapi/repository"
 	"blogapi/request"
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -38,15 +39,16 @@ func CategoryDel(c echo.Context) error {
 	if helper.Validator(&c, &rq) != nil {
 		return nil
 	}
-	db := config.Conn()
-	//  id e ait kategorileri sorgulaama
-	result := db.Find(&category, rq.ID)
-	if result.RowsAffected == 0 {
-		return c.JSON(http.StatusBadRequest, helper.Response(nil, "Kayıtlı İd Bulunamadı"))
-	}
-	db.Where("id = ? ", rq.ID).Find(&category)
 
-	db.Unscoped().Delete(&category)
+	//  id e ait kategorileri sorgulaama
+	count := repository.Get().Category().Query(category, rq.ID)
+	fmt.Println(count)
+
+	/*	if err == 0 {
+		return c.JSON(http.StatusBadRequest, helper.Response(nil, "Kayıtlı İd Bulunamadı"))
+	}*/
+
+	//repository.Get().Category().Del(category, rq.ID)
 
 	return c.JSON(http.StatusOK, helper.Response(nil, "Silme İşlemi Başarılı!"))
 }

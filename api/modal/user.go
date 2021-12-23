@@ -1,6 +1,8 @@
 package modal
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -9,5 +11,5 @@ type User struct {
 	Email    string `gorm:"unique" json:"email"`
 	Password string `json:"password"`
 	Age      int    `json:"age"`
-	Admin    bool   `gorm:"default:0" json:"admin"`
+	Admin    bool   `gorm:"default:false" json:"admin"`
 }
