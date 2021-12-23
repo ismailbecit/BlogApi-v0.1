@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 func CategoryInsert(c echo.Context) error {
@@ -34,21 +35,19 @@ func CategoryList(c echo.Context) error {
 	return c.JSON(http.StatusOK, category)
 }
 func CategoryDel(c echo.Context) error {
-	var category modal.Category
 	var rq request.CategoryDel
+
 	if helper.Validator(&c, &rq) != nil {
 		return nil
 	}
+	category := modal.Category{
+		Model: gorm.Model{
+			ID: rq.ID,
+		},
+	}
+	fmt.Println(category.ID)
 
-	//  id e ait kategorileri sorgulaama
-	count := repository.Get().Category().Query(category, rq.ID)
-	fmt.Println(count)
-
-	/*	if err == 0 {
-		return c.JSON(http.StatusBadRequest, helper.Response(nil, "Kayıtlı İd Bulunamadı"))
-	}*/
-
-	//repository.Get().Category().Del(category, rq.ID)
+	repository.Get().Category().Del(category)
 
 	return c.JSON(http.StatusOK, helper.Response(nil, "Silme İşlemi Başarılı!"))
 }

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"blogapi/api/modal"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -20,15 +21,9 @@ func (ct CategoryRepo) New(category modal.Category) error {
 	return err.Error
 }
 
-func (ct CategoryRepo) Del(category modal.Category, id uint) error {
+func (ct CategoryRepo) Del(category modal.Category) error {
 
-	err := ct.db.Unscoped().Delete(&category, id)
+	err := ct.db.Delete(&category, category.ID)
+	fmt.Println(category.ID)
 	return err.Error
-}
-
-func (ct CategoryRepo) Query(category modal.Category, id uint) int64 {
-	var count int64
-	ct.db.Where("id = ? ", id).Find(&category).Count(&count)
-	return count
-
 }

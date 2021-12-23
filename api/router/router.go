@@ -32,7 +32,6 @@ func Router() {
 	category.GET("/list", controller.CategoryList)
 	category.POST("/insert", controller.CategoryInsert)
 	category.POST("/del", controller.CategoryDel)
-
 	e.Start(":8080")
 
 }
